@@ -1,15 +1,15 @@
 I. Generic install:
 
-1) Create a "libs" directory in the "KeyRingManager" directory
+1) Create a "libs" directory in the "MultiAccountManager" directory
 2) Add the dofus module library in this new directory
 3) Compile the module
 
 II. Linux install:
 
-$cd KeyRingManager
+$cd MultiAccountManager
 $mkdir libs
 $cp [path of your library]/modules-library-2.3.5.swc libs
-$mxmlc -output KeyRingManager.swf -source-path src -compiler.library-path+=libs/modules-library-2.3.5.swc -keep-as3-metadata Api Module DevMode -- src/KeyRingManager.as
+$mxmlc -output MultiAccountManager.swf -source-path src -compiler.library-path+=libs/modules-library-2.3.5.swc -keep-as3-metadata Api Module DevMode -- src/MultiAccountManager.as
 
 III. Other informations:
 

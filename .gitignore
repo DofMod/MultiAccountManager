@@ -1,2 +1,6 @@
 libs/
 MultiAccountManager.swf
+
+*.lnk
+*.as3proj
+obj/

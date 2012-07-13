@@ -1,11 +1,5 @@
 package {
-	import d2actions.ChatTextOutput;
-	import d2actions.PartyInvitation;
-	import d2api.PlayedCharacterApi;
 	import d2api.SystemApi;
-	import d2enums.ChatChannelsMultiEnum;
-	import d2hooks.ChatError;
-	import d2hooks.ChatSendPreInit;
 	import error.AccountIndexOutOfRangeError;
 	import error.FunctionKeyAllreadyRegisterError;
 	import error.FunctionKeyUnregisteredError;
@@ -51,10 +45,9 @@ package {
 		}
 		
 		// Send functions
-		public function sendAll(...args) : void
+		public function sendAll(functionKey:String, ...args) : void
 		{
-			traceDofus("sendAll");
-			args.unshift("call");
+			args.unshift("call", functionKey);
 			
 			var ii:int;
 			var argsCopy:Array;
@@ -67,10 +60,9 @@ package {
 			}
 		}
 		
-		public function sendOther(...args) : void
+		public function sendOther(functionKey:String, ...args) : void
 		{
-			traceDofus("sendOther");
-			args.unshift("call");
+			args.unshift("call", functionKey);
 			
 			var ii:int;
 			var argsCopy:Array;
@@ -86,14 +78,13 @@ package {
 			}
 		}
 		
-		public function send(accountIndex:int, ...args) : void
-		{
-			traceDofus("send(" + accountIndex + ")");
-			
+		public function send(accountIndex:int, functionKey:String, ...args) : void
+		{	
 			if (accountIndex < 0 || accountIndex >= maxAccounts)
 				throw new AccountIndexOutOfRangeError(accountIndex, 0, maxAccounts);
 			
-			args.unshift(getLcName(accountIndex), "call");
+			args.unshift(getLcName(accountIndex), "call", functionKey);
+			
 			lc.send.apply(null, args);
 		}
 		
@@ -115,7 +106,7 @@ package {
 		}
 		
 		// Call functions
-		public function call(functionKey:String, ...args) : void
+		private function call(functionKey:String, ...args) : void
 		{
 			if (!callbacks.hasOwnProperty(functionKey))
 				throw new Error(functionKey);

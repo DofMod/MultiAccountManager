@@ -7,7 +7,8 @@ package {
 	import d2hooks.ChatError;
 	import d2hooks.ChatSendPreInit;
 	import error.AccountIndexOutOfRangeError;
-	import error.CallbackKeyAllreadyTakenError;
+	import error.FunctionKeyAllreadyRegisterError;
+	import error.FunctionKeyUnregisteredError;
 	import error.MaxAccountError;
 	import flash.display.Sprite;
 	import flash.events.StatusEvent;
@@ -100,9 +101,17 @@ package {
 		public function register(functionKey:String, functionPtr:Function) : void
 		{
 			if (callbacks.hasOwnProperty(functionKey))
-				throw new CallbackKeyAllreadyTakenError(functionKey);
+				throw new FunctionKeyAllreadyRegisterError(functionKey);
 			
 			callbacks[functionKey] = functionPtr;
+		}
+		
+		public function unregister(functionKey:String) : void
+		{
+			if (!callbacks.hasOwnProperty(functionKey))
+				throw new FunctionKeyUnregisteredError(functionKey);
+			
+			delete callbacks[functionKey];
 		}
 		
 		// Call functions

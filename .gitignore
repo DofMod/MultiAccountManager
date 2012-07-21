@@ -3,4 +3,6 @@ MultiAccountManager.swf
 
 *.lnk
 *.as3proj
+*.docproj
 obj/
+doc/

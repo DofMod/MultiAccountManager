@@ -1,14 +1,20 @@
-package {
+package
+{
 	import d2api.SystemApi;
 	import error.AccountIndexOutOfRangeError;
-	import error.FunctionKeyAllreadyRegisterError;
-	import error.FunctionKeyUnregisteredError;
-	import error.MaxAccountError;
+	import error.FunctionKeyAlreadyRegisteredError;
+	import error.FunctionKeyNotRegisteredError;
+	import error.MaxAccountReachedError;
 	import flash.display.Sprite;
 	import flash.events.StatusEvent;
 	import flash.net.LocalConnection;
 	import flash.utils.Dictionary;
-
+	
+	/**
+	 * The main class of the module. Its manage the differents connections.
+	 *
+	 * @author	Relena
+	 */
 	public class MultiAccountManager extends Sprite
 	{
 		//::///////////////////////////////////////////////////////////
@@ -16,27 +22,33 @@ package {
 		//::///////////////////////////////////////////////////////////
 		
 		// APIs
+		/**
+		 * @private
+		 */
 		public var sysApi:SystemApi; // Hooks, Actions
 		
-		public var lc:LocalConnection;
+		private var lc:LocalConnection;
 		
 		private const maxAccounts:int = 8;
 		private const lcPrefix:String = "lcDofus_";
 		private var accountIndex:int;
 		
-		public var callbacks:Dictionary;
-
+		private var callbacks:Dictionary;
+		
 		//::///////////////////////////////////////////////////////////
 		//::// Public methods
 		//::///////////////////////////////////////////////////////////
-
-		public function main() : void
+		
+		/**
+		 * Initialise the module.
+		 */
+		public function main():void
 		{
 			try
 			{
 				initLocalConnection();
 			}
-			catch (error:MaxAccountError) // Too many accounts.
+			catch (error:MaxAccountReachedError) // Too many accounts.
 			{
 				return;
 			}
@@ -44,8 +56,17 @@ package {
 			callbacks = new Dictionary();
 		}
 		
-		// Send functions
-		public function sendAll(functionKey:String, ...args) : void
+		/**
+		 * Call the remote function associate to <code>functionKey</code> with
+		 * <code>...args</code> arguments on all the accounts (include itself).
+		 *
+		 * @param	functionKey	The function key of the remote function to call.
+		 * @param	...args	The arguments who will be passed to the remote
+		 * 			function.
+		 *
+		 * @see	#register()
+		 */
+		public function sendAll(functionKey:String, ... args):void
 		{
 			args.unshift("call", functionKey);
 			
@@ -60,7 +81,17 @@ package {
 			}
 		}
 		
-		public function sendOther(functionKey:String, ...args) : void
+		/**
+		 * Call the remote function associate to <code>functionKey</code> with
+		 * <code>...args</code> arguments on all the sibling accounts.
+		 *
+		 * @param	functionKey	The function key of the remote function to call.
+		 * @param	...args	The arguments who will be passed to the remote
+		 * 			function.
+		 *
+		 * @see	#register()
+		 */
+		public function sendOther(functionKey:String, ... args):void
 		{
 			args.unshift("call", functionKey);
 			
@@ -78,44 +109,75 @@ package {
 			}
 		}
 		
-		public function send(accountIndex:int, functionKey:String, ...args) : void
-		{	
+		/**
+		 * Call the remote function associate to <code>functionKey</code> with
+		 * <code>...args</code> arguments on the account with
+		 * <code>accountIndex</code> index.
+		 *
+		 * @param	accountIndex	Index of the destination account.
+		 * @param	functionKey	The function key of the remote function to call.
+		 * @param	...args	The arguments who will be passed to the remote
+		 * 			function.
+		 *
+		 * @throws	error.AccountIndexOutOfRangeError
+		 *
+		 * @see	#register()
+		 */
+		public function send(
+			accountIndex:int, functionKey:String, ... args):void
+		{
 			if (accountIndex < 0 || accountIndex >= maxAccounts)
-				throw new AccountIndexOutOfRangeError(accountIndex, 0, maxAccounts);
+				throw new AccountIndexOutOfRangeError(
+					accountIndex, 0, maxAccounts);
 			
 			args.unshift(getLcName(accountIndex), "call", functionKey);
 			
 			lc.send.apply(null, args);
 		}
 		
-		// Register functions
-		public function register(functionKey:String, functionPtr:Function) : void
+		/**
+		 * Register a function key with a remote function to call.
+		 *
+		 * @param	functionKey	An arbitrary string to accociate with the remote
+		 * 			call of the <code>functionPtr</code> function.
+		 * @param	functionPtr The function who will be called on the remote
+		 * 			account
+		 *
+		 * @throws	error.FunctionKeyAllreadyRegisteredError
+		 *
+		 * @see	#unregister()
+		 */
+		public function register(functionKey:String, functionPtr:Function):void
 		{
 			if (callbacks.hasOwnProperty(functionKey))
-				throw new FunctionKeyAllreadyRegisterError(functionKey);
+				throw new FunctionKeyAlreadyRegisteredError(functionKey);
 			
 			callbacks[functionKey] = functionPtr;
 		}
 		
-		public function unregister(functionKey:String) : void
+		/**
+		 * Unregister a function key.
+		 *
+		 * @param	functionKey The function key to unregister.
+		 *
+		 * @throws	error.FunctionKeyNotRegisteredError
+		 *
+		 * @see	#register()
+		 */
+		public function unregister(functionKey:String):void
 		{
 			if (!callbacks.hasOwnProperty(functionKey))
-				throw new FunctionKeyUnregisteredError(functionKey);
+				throw new FunctionKeyNotRegisteredError(functionKey);
 			
 			delete callbacks[functionKey];
 		}
 		
-		// Call functions
-		private function call(functionKey:String, ...args) : void
-		{
-			if (!callbacks.hasOwnProperty(functionKey))
-				throw new Error(functionKey);
-			
-			callbacks[functionKey].apply(null, args);
-		}
-		
-		// Utils
-		public function getIndex() : int
+		/**
+		 * Return the index of the account.
+		 *
+		 * @return	The index of the account.
+		 */
+		public function getIndex():int
 		{
 			return accountIndex;
 		}
@@ -123,13 +185,42 @@ package {
 		//::///////////////////////////////////////////////////////////
 		//::// Private methods
 		//::///////////////////////////////////////////////////////////
-
-		private function getLcName(accountIndex:int) : String
+		
+		/**
+		 * Call the remote function associate to the function key
+		 * <code>functionKey</code> with <code>...args</code> arguments.
+		 *
+		 * @param	functionKey	The function key of the remote function to call.
+		 * @param	...args	The arguments who will be passed to the remote
+		 * 			function.
+		 *
+		 * @throws	error.FunctionKeyNotRegisteredError
+		 */
+		private function call(functionKey:String, ... args):void
+		{
+			if (!callbacks.hasOwnProperty(functionKey))
+				throw new FunctionKeyNotRegisteredError(functionKey);
+			
+			callbacks[functionKey].apply(null, args);
+		}
+		
+		/**
+		 * Return the local connection name associate to the
+		 * <code>accountIndex</code> index.
+		 *
+		 * @param	accountIndex	Index of the destination account.
+		 *
+		 * @return	The local connection name.
+		 */
+		private function getLcName(accountIndex:int):String
 		{
 			return lcPrefix + accountIndex;
 		}
 		
-		private function initLocalConnection() : void
+		/**
+		 * Try to open a new local connection.
+		 */
+		private function initLocalConnection():void
 		{
 			lc = new LocalConnection();
 			lc.client = this;
@@ -149,14 +240,20 @@ package {
 				}
 			}
 			
-			if (accountIndex == maxAccounts) throw new MaxAccountError(maxAccounts);
+			if (accountIndex == maxAccounts)
+				throw new MaxAccountReachedError(maxAccounts);
 		}
-			
+		
 		//::///////////////////////////////////////////////////////////
 		//::// Events
 		//::///////////////////////////////////////////////////////////
 		
-		private function statusEventHandler(status:StatusEvent) : void
+		/**
+		 * Handle status event.
+		 *
+		 * @param	status ...
+		 */
+		private function statusEventHandler(status:StatusEvent):void
 		{
 			return;
 		}
@@ -165,14 +262,14 @@ package {
 		//::// Debug
 		//::///////////////////////////////////////////////////////////
 		
-		private function traceDofus(str:String) : void
+		/**
+		 * Log message.
+		 *
+		 * @param	str	The string to display.
+		 */
+		private function traceDofus(str:String):void
 		{
 			sysApi.log(2, str);
-		}
-		
-		public function logdebug() : void
-		{
-			traceDofus("debug!!!!!!!!!!!!!!!!!");
 		}
 	}
 }

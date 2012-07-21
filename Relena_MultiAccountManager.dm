@@ -5,7 +5,7 @@
         <!-- Nom affiché dans la liste des modules -->
         <name>MultiAccountManager</name>        
         <!-- Version du module -->
-        <version>1.29</version>
+        <version>1.30</version>
         <!-- Dernière version de dofus pour laquelle ce module fonctionne -->
         <dofusVersion>2.6.0</dofusVersion>
         <!-- Auteur du module -->

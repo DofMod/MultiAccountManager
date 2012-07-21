@@ -122,6 +122,7 @@ package
 		 * @throws	error.AccountIndexOutOfRangeError
 		 *
 		 * @see	#register()
+		 * @see	error.AccountIndexOutOfRangeError
 		 */
 		public function send(
 			accountIndex:int, functionKey:String, ... args):void
@@ -143,9 +144,10 @@ package
 		 * @param	functionPtr The function who will be called on the remote
 		 * 			account
 		 *
-		 * @throws	error.FunctionKeyAllreadyRegisteredError
+		 * @throws	error.FunctionKeyAlreadyRegisteredError
 		 *
 		 * @see	#unregister()
+		 * @see	error.FunctionKeyAlreadyRegisteredError
 		 */
 		public function register(functionKey:String, functionPtr:Function):void
 		{
@@ -163,6 +165,7 @@ package
 		 * @throws	error.FunctionKeyNotRegisteredError
 		 *
 		 * @see	#register()
+		 * @see	error.FunctionKeyNotRegisteredError
 		 */
 		public function unregister(functionKey:String):void
 		{
@@ -195,6 +198,8 @@ package
 		 * 			function.
 		 *
 		 * @throws	error.FunctionKeyNotRegisteredError
+		 * 
+		 * @see	error.FunctionKeyNotRegisteredError
 		 */
 		private function call(functionKey:String, ... args):void
 		{

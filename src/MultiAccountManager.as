@@ -68,7 +68,7 @@ package
 		 */
 		public function sendAll(functionKey:String, ... args):void
 		{
-			args.unshift("call", functionKey);
+			args.unshift("callee", functionKey);
 			
 			var ii:int;
 			var argsCopy:Array;
@@ -93,7 +93,7 @@ package
 		 */
 		public function sendOther(functionKey:String, ... args):void
 		{
-			args.unshift("call", functionKey);
+			args.unshift("callee", functionKey);
 			
 			var ii:int;
 			var argsCopy:Array;
@@ -133,7 +133,7 @@ package
 			
 			// TODO: Check Index availability.
 			
-			args.unshift(getLcName(accountIndex), "call", functionKey);
+			args.unshift(getLcName(accountIndex), "callee", functionKey);
 			
 			lc.send.apply(null, args);
 		}
@@ -151,7 +151,7 @@ package
 		 *
 		 * @private
 		 */
-		private function call(functionKey:String, ... args):void
+		public function callee(functionKey:String, ... args):void
 		{
 			if (!callbacks.hasOwnProperty(functionKey))
 				throw new FunctionKeyNotRegisteredError(functionKey);

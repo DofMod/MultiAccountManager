@@ -36,7 +36,7 @@ package
 		private var callbacks:Dictionary;
 		
 		//::///////////////////////////////////////////////////////////
-		//::// Public methods
+		//::// Methods
 		//::///////////////////////////////////////////////////////////
 		
 		/**
@@ -131,9 +131,32 @@ package
 				throw new AccountIndexOutOfRangeError(
 					accountIndex, 0, maxAccounts);
 			
+			// TODO: Check Index availability.
+			
 			args.unshift(getLcName(accountIndex), "call", functionKey);
 			
 			lc.send.apply(null, args);
+		}
+		
+		/**
+		 * This is the callee function called bye send, sendOther and sendAll.
+		 *
+		 * @param	functionKey	The function key of the remote function to call.
+		 * @param	...args	The arguments who will be passed to the remote
+		 * 			function.
+		 *
+		 * @throws	error.FunctionKeyNotRegisteredError
+		 *
+		 * @see	error.FunctionKeyNotRegisteredError
+		 *
+		 * @private
+		 */
+		private function call(functionKey:String, ... args):void
+		{
+			if (!callbacks.hasOwnProperty(functionKey))
+				throw new FunctionKeyNotRegisteredError(functionKey);
+			
+			callbacks[functionKey].apply(null, args);
 		}
 		
 		/**
@@ -183,30 +206,6 @@ package
 		public function getIndex():int
 		{
 			return accountIndex;
-		}
-		
-		//::///////////////////////////////////////////////////////////
-		//::// Private methods
-		//::///////////////////////////////////////////////////////////
-		
-		/**
-		 * Call the remote function associate to the function key
-		 * <code>functionKey</code> with <code>...args</code> arguments.
-		 *
-		 * @param	functionKey	The function key of the remote function to call.
-		 * @param	...args	The arguments who will be passed to the remote
-		 * 			function.
-		 *
-		 * @throws	error.FunctionKeyNotRegisteredError
-		 * 
-		 * @see	error.FunctionKeyNotRegisteredError
-		 */
-		private function call(functionKey:String, ... args):void
-		{
-			if (!callbacks.hasOwnProperty(functionKey))
-				throw new FunctionKeyNotRegisteredError(functionKey);
-			
-			callbacks[functionKey].apply(null, args);
 		}
 		
 		/**

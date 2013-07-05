@@ -26,6 +26,7 @@ package
 		// Some constants
 		private static const MAX_ACCOUNTS:int = 8;
 		private static const LC_PREFIX:String = "lcDofus_";
+		private static const CALLEE_FUNCTION:String = "callee";
 		
 		// APIs
 		/**
@@ -75,7 +76,7 @@ package
 		 */
 		public function sendAll(functionKey:String, ... args):void
 		{
-			args.unshift("callee", functionKey);
+			args.unshift(CALLEE_FUNCTION, functionKey);
 			
 			var ii:int;
 			var argsCopy:Array;
@@ -100,7 +101,7 @@ package
 		 */
 		public function sendOther(functionKey:String, ... args):void
 		{
-			args.unshift("callee", functionKey);
+			args.unshift(CALLEE_FUNCTION, functionKey);
 			
 			var ii:int;
 			var argsCopy:Array;
@@ -140,7 +141,7 @@ package
 			
 			// TODO: Check Index availability.
 			
-			args.unshift(getLcName(accountIndex), "callee", functionKey);
+			args.unshift(getLcName(accountIndex), CALLEE_FUNCTION, functionKey);
 			
 			_lc.send.apply(null, args);
 		}

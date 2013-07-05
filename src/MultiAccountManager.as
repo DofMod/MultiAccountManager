@@ -1,6 +1,7 @@
 package
 {
 	import d2api.SystemApi;
+	import enums.HooksEnum;
 	import error.AccountIndexOutOfRangeError;
 	import error.FunctionKeyAlreadyRegisteredError;
 	import error.FunctionKeyNotRegisteredError;
@@ -9,6 +10,7 @@ package
 	import flash.events.StatusEvent;
 	import flash.net.LocalConnection;
 	import flash.utils.Dictionary;
+	import hooks.ModuleMultiAccountManagerLoaded;
 	
 	/**
 	 * The main class of the module. Its manage the differents connections.
@@ -45,6 +47,8 @@ package
 		 */
 		public function main():void
 		{
+			sysApi.createHook(HooksEnum.MODULE_MULTI_ACCOUNT_MANAGER_LOADED);
+			
 			try
 			{
 				initLocalConnection();
@@ -55,6 +59,8 @@ package
 			}
 			
 			_callbacks = new Dictionary();
+			
+			sysApi.dispatchHook(ModuleMultiAccountManagerLoaded);
 		}
 		
 		/**

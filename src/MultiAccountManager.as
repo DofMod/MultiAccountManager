@@ -21,19 +21,20 @@ package
 		//::// Properties
 		//::///////////////////////////////////////////////////////////
 		
+		// Some constants
+		private static const MAX_ACCOUNTS:int = 8;
+		private static const LC_PREFIX:String = "lcDofus_";
+		
 		// APIs
 		/**
 		 * @private
 		 */
 		public var sysApi:SystemApi; // Hooks, Actions
 		
-		private var lc:LocalConnection;
-		
-		private const maxAccounts:int = 8;
-		private const lcPrefix:String = "lcDofus_";
-		private var accountIndex:int;
-		
-		private var callbacks:Dictionary;
+		// Some globals
+		private var _lc:LocalConnection;
+		private var _callbacks:Dictionary;
+		private var _accountIndex:int;
 		
 		//::///////////////////////////////////////////////////////////
 		//::// Methods
@@ -53,7 +54,7 @@ package
 				return;
 			}
 			
-			callbacks = new Dictionary();
+			_callbacks = new Dictionary();
 		}
 		
 		/**
@@ -72,12 +73,12 @@ package
 			
 			var ii:int;
 			var argsCopy:Array;
-			for (ii = 0; ii < maxAccounts; ii++)
+			for (ii = 0; ii < MAX_ACCOUNTS; ii++)
 			{
 				argsCopy = args.concat();
 				argsCopy.unshift(getLcName(ii));
 				
-				lc.send.apply(null, argsCopy);
+				_lc.send.apply(null, argsCopy);
 			}
 		}
 		
@@ -97,15 +98,15 @@ package
 			
 			var ii:int;
 			var argsCopy:Array;
-			for (ii = 0; ii < maxAccounts; ii++)
+			for (ii = 0; ii < MAX_ACCOUNTS; ii++)
 			{
-				if (ii == accountIndex)
+				if (ii == _accountIndex)
 					continue;
 				
 				argsCopy = args.concat();
 				argsCopy.unshift(getLcName(ii));
 				
-				lc.send.apply(null, argsCopy);
+				_lc.send.apply(null, argsCopy);
 			}
 		}
 		
@@ -127,15 +128,15 @@ package
 		public function send(
 			accountIndex:int, functionKey:String, ... args):void
 		{
-			if (accountIndex < 0 || accountIndex >= maxAccounts)
+			if (accountIndex < 0 || accountIndex >= MAX_ACCOUNTS)
 				throw new AccountIndexOutOfRangeError(
-					accountIndex, 0, maxAccounts);
+					accountIndex, 0, MAX_ACCOUNTS);
 			
 			// TODO: Check Index availability.
 			
 			args.unshift(getLcName(accountIndex), "callee", functionKey);
 			
-			lc.send.apply(null, args);
+			_lc.send.apply(null, args);
 		}
 		
 		/**
@@ -153,10 +154,10 @@ package
 		 */
 		public function callee(functionKey:String, ... args):void
 		{
-			if (!callbacks.hasOwnProperty(functionKey))
+			if (!_callbacks.hasOwnProperty(functionKey))
 				throw new FunctionKeyNotRegisteredError(functionKey);
 			
-			callbacks[functionKey].apply(null, args);
+			_callbacks[functionKey].apply(null, args);
 		}
 		
 		/**
@@ -174,10 +175,10 @@ package
 		 */
 		public function register(functionKey:String, functionPtr:Function):void
 		{
-			if (callbacks.hasOwnProperty(functionKey))
+			if (_callbacks.hasOwnProperty(functionKey))
 				throw new FunctionKeyAlreadyRegisteredError(functionKey);
 			
-			callbacks[functionKey] = functionPtr;
+			_callbacks[functionKey] = functionPtr;
 		}
 		
 		/**
@@ -192,10 +193,10 @@ package
 		 */
 		public function unregister(functionKey:String):void
 		{
-			if (!callbacks.hasOwnProperty(functionKey))
+			if (!_callbacks.hasOwnProperty(functionKey))
 				throw new FunctionKeyNotRegisteredError(functionKey);
 			
-			delete callbacks[functionKey];
+			delete _callbacks[functionKey];
 		}
 		
 		/**
@@ -205,7 +206,7 @@ package
 		 */
 		public function getIndex():int
 		{
-			return accountIndex;
+			return _accountIndex;
 		}
 		
 		/**
@@ -218,7 +219,7 @@ package
 		 */
 		private function getLcName(accountIndex:int):String
 		{
-			return lcPrefix + accountIndex;
+			return LC_PREFIX + _accountIndex;
 		}
 		
 		/**
@@ -226,15 +227,15 @@ package
 		 */
 		private function initLocalConnection():void
 		{
-			lc = new LocalConnection();
-			lc.client = this;
-			lc.addEventListener(StatusEvent.STATUS, statusEventHandler);
+			_lc = new LocalConnection();
+			_lc.client = this;
+			_lc.addEventListener(StatusEvent.STATUS, statusEventHandler);
 			
-			for (accountIndex = 0; accountIndex < maxAccounts; accountIndex++)
+			for (_accountIndex = 0; _accountIndex < MAX_ACCOUNTS; _accountIndex++)
 			{
 				try
 				{
-					lc.connect(getLcName(accountIndex));
+					_lc.connect(getLcName(_accountIndex));
 					
 					break;
 				}
@@ -244,8 +245,10 @@ package
 				}
 			}
 			
-			if (accountIndex == maxAccounts)
-				throw new MaxAccountReachedError(maxAccounts);
+			if (_accountIndex == MAX_ACCOUNTS)
+			{
+				throw new MaxAccountReachedError(MAX_ACCOUNTS);
+			}
 		}
 		
 		//::///////////////////////////////////////////////////////////

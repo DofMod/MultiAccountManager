@@ -261,19 +261,5 @@ package
 		{
 			return;
 		}
-		
-		//::///////////////////////////////////////////////////////////
-		//::// Debug
-		//::///////////////////////////////////////////////////////////
-		
-		/**
-		 * Log message.
-		 *
-		 * @param	str	The string to display.
-		 */
-		private function traceDofus(str:String):void
-		{
-			sysApi.log(2, str);
-		}
 	}
 }

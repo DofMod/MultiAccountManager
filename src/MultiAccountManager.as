@@ -226,7 +226,7 @@ package
 		 */
 		private function getLcName(accountIndex:int):String
 		{
-			return LC_PREFIX + _accountIndex;
+			return LC_PREFIX + accountIndex;
 		}
 		
 		/**
